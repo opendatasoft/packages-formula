@@ -20,7 +20,18 @@ include:
 ### PRE-REQ PKGS (without these, some of the WANTED PKGS will fail to install)
 pkg_req_pkgs:
   pkg.installed:
+    {%- if req_packages is mapping %}
+    - pkgs:
+      {%- for p, v in req_packages.items() %}
+        {%- if v %}
+      - {{ p }}: {{ v }}
+        {%- else %}
+      - {{ p }}
+        {%- endif %}
+      {%- endfor %}
+    {%- else %}
     - pkgs: {{ req_packages | json }}
+    {%- endif %}
     {%- if req_states %}
     - require:
       {%- for dep in req_states %}
@@ -35,7 +46,11 @@ held_pkgs:
     {%- if held_packages is mapping %}
     - pkgs:
       {%- for p, v in held_packages.items() %}
+        {%- if v %}
       - {{ p }}: {{ v }}
+        {%- else %}
+      - {{ p }}
+        {%- endif %}
       {%- endfor %}
     {%- else %}
     - pkgs: {{ held_packages | json }}
@@ -54,7 +69,18 @@ held_pkgs:
 
 wanted_pkgs:
   pkg.installed:
+    {%- if wanted_packages is mapping %}
+    - pkgs:
+      {%- for p, v in wanted_packages.items() %}
+        {%- if v %}
+      - {{ p }}: {{ v }}
+        {%- else %}
+      - {{ p }}
+        {%- endif %}
+      {%- endfor %}
+    {%- else %}
     - pkgs: {{ wanted_packages | json }}
+    {%- endif %}
     {%- if grains['os_family'] not in ['Suse'] %}
     - hold: false
     {%- endif %}
@@ -69,6 +95,13 @@ wanted_pkgs:
 
 unwanted_pkgs:
   pkg.purged:
+    {%- if unwanted_packages is mapping %}
+    - pkgs:
+      {%- for p, v in unwanted_packages.items() %}
+      - {{ p }}
+      {%- endfor %}
+    {%- else %}
     - pkgs: {{ unwanted_packages | json }}
+    {%- endif %}
 
 {%- endif %}
